@@ -1,0 +1,66 @@
+.logo {
+  width: 50px;
+  height: auto;
+  border-radius: 50%;
+}
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.nav {
+  flex-wrap: nowrap;
+  gap: 15px;
+}
+.card {
+  margin-bottom: 20px;
+}
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1030;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+body {
+  padding-top: 70px;
+}
+#notifications,
+#about,
+#courses,
+#tutors {
+  scroll-margin-top: 50px;
+}
+@media (max-width: 800px) {
+  ul.nav {
+    display: none;
+  }
+  .menu-toggle {
+    display: block;
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: white;
+    text-align: center;
+  }
+  ul.nav.active {
+    display: block;
+    background-color: #007bff;
+    text-align: center;
+    padding: 10px 0;
+    border-radius: 5px;
+  }
+  ul.nav li {
+    display: block;
+    margin: 5px 0;
+  }
+  ul.nav li a {
+    color: white;
+    text-decoration: none;
+  }
+}
+@media (min-width: 801px) {
+  .menu-toggle {
+    display: none;
+  }
+}
