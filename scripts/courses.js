@@ -13,6 +13,7 @@ async function fetchCourses() {
     return courses;
   } catch (error) {
     console.error("Error fetching courses:", error);
+    return [];
   }
 }
 
@@ -22,11 +23,11 @@ function renderCourses(courses) {
 
   if (courses.length === 0) {
     courseList.innerHTML = `
-            <div class="col-12">
-                <div class="alert alert-warning" role="alert">
-                    No courses found.
-                </div>
-            </div>`;
+      <div class="col-12">
+        <div class="alert alert-warning" role="alert">
+          No courses found.
+        </div>
+      </div>`;
     return;
   }
 
@@ -61,89 +62,13 @@ function renderCourses(courses) {
           <p class="card-text">Level: ${course.level}</p>
           <p class="card-text">Duration: ${course.total_length} weeks</p>
           <p class="card-text"><strong>Start Dates:</strong><br>${formattedDates}</p>
-          <button class="btn btn-primary apply-button" data-bs-toggle="modal" data-bs-target="#applyModal">Apply</button>
+          <button class="btn btn-primary apply-button" data-bs-toggle="modal" data-bs-target="#applyModal" data-id="${course.id}">Apply</button>
         </div>
       </div>`;
 
     const applyButton = card.querySelector(".apply-button");
     applyButton.addEventListener("click", () => {
-      document.getElementById("applyCourseName").value = course.name;
-      document.getElementById("instructorName").value = course.teacher;
-
-      document
-        .getElementById("applyModal")
-        .addEventListener("hidden.bs.modal", () => {
-          const form = document.getElementById("applyForm");
-          form.reset();
-
-          document.getElementById("courseDuration").value = "";
-          document.getElementById("endDate").value = "";
-          document.getElementById("totalCost").value = "";
-        });
-
-      document.getElementById(
-        "courseDuration"
-      ).value = `${course.total_length} weeks`;
-
-      const startDateSelect = document.getElementById("startDate");
-      startDateSelect.innerHTML = "";
-
-      const dates = [
-        ...new Set(
-          course.start_dates.map((dateTime) => dateTime.split("T")[0])
-        ),
-      ];
-      dates.forEach((date) => {
-        const option = document.createElement("option");
-        option.value = date;
-        option.textContent = new Date(date).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        });
-        startDateSelect.appendChild(option);
-      });
-
-      const selectedStartDate = new Date(course.start_dates[0]);
-      const courseEndDate = new Date(selectedStartDate);
-      courseEndDate.setDate(courseEndDate.getDate() + course.total_length * 7);
-      document.getElementById("endDate").value =
-        courseEndDate.toLocaleDateString();
-
-      const startTimeSelect = document.getElementById("startTime");
-      startTimeSelect.innerHTML = "";
-
-      startDateSelect.addEventListener("change", () => {
-        const selectedDate = startDateSelect.value;
-        startTimeSelect.innerHTML = "";
-
-        const times = course.start_dates
-          .filter((dateTime) => dateTime.startsWith(selectedDate))
-          .map((dateTime) => dateTime.split("T")[1].slice(0, 5));
-
-        times.forEach((time) => {
-          const option = document.createElement("option");
-          option.value = time;
-          option.textContent = time;
-          startTimeSelect.appendChild(option);
-        });
-      });
-
-      startDateSelect.dispatchEvent(new Event("change"));
-
-      document
-        .querySelectorAll(
-          "#studentsNumber, #earlyRegistration, #groupEnrollment, #intensiveCourse, #supplementary, #personalized, #excursions, #assessment, #interactive, #startDate, #startTime"
-        )
-        .forEach((input) => {
-          input.addEventListener("change", () => {
-            const totalCost = calculateTotalCost(course);
-            document.getElementById("totalCost").value = `${totalCost} RUB`;
-          });
-        });
-
-      const totalCost = calculateTotalCost(course);
-      document.getElementById("totalCost").value = `${totalCost} RUB`;
+      setupApplicationForm(course);
     });
 
     courseList.appendChild(card);
@@ -152,17 +77,102 @@ function renderCourses(courses) {
   renderPagination(courses.length);
 }
 
+function setupApplicationForm(course) {
+  document.getElementById("applyCourseName").value = course.name;
+  document.getElementById("applyCourseName").setAttribute("data-id", course.id); // Устанавливаем ID курса
+  document.getElementById("instructorName").value = course.teacher;
+  document.getElementById(
+    "courseDuration"
+  ).value = `${course.total_length} weeks`;
+
+  const startDateSelect = document.getElementById("startDate");
+  startDateSelect.innerHTML = "";
+
+  const dates = [
+    ...new Set(course.start_dates.map((dateTime) => dateTime.split("T")[0])),
+  ];
+  dates.forEach((date) => {
+    const option = document.createElement("option");
+    option.value = date;
+    option.textContent = new Date(date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+    startDateSelect.appendChild(option);
+  });
+
+  startDateSelect.addEventListener("change", () => {
+    const selectedDate = startDateSelect.value;
+    const startTimeSelect = document.getElementById("startTime");
+    startTimeSelect.innerHTML = "";
+
+    const times = course.start_dates
+      .filter((dateTime) => dateTime.startsWith(selectedDate))
+      .map((dateTime) => dateTime.split("T")[1].slice(0, 5));
+
+    times.forEach((time) => {
+      const option = document.createElement("option");
+      option.value = time;
+      option.textContent = time;
+      startTimeSelect.appendChild(option);
+    });
+    if (selectedDate) {
+      const startDate = new Date(selectedDate);
+      const endDate = new Date(startDate);
+      endDate.setDate(startDate.getDate() + course.total_length * 7);
+      document.getElementById("endDate").value = endDate.toLocaleDateString(
+        "en-US",
+        {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }
+      );
+    }
+  });
+
+  startDateSelect.dispatchEvent(new Event("change"));
+
+  document
+    .querySelectorAll("#applyForm input, #applyForm select")
+    .forEach((input) => {
+      input.addEventListener("change", () => {
+        const totalCost = calculateTotalCost(course);
+        document.getElementById("totalCost").value = `${totalCost} RUB`;
+      });
+    });
+
+  const totalCost = calculateTotalCost(course);
+  document.getElementById("totalCost").value = `${totalCost} RUB`;
+}
+
 function calculateTotalCost(course) {
   const studentsNumber =
     parseInt(document.getElementById("studentsNumber").value) || 1;
   let totalCost =
     course.course_fee_per_hour * course.total_length * course.week_length;
+  const discountMessage = document.getElementById("discountMessage");
+  discountMessage.innerHTML = "";
 
-  if (document.getElementById("earlyRegistration").checked) totalCost *= 0.9;
-  if (document.getElementById("groupEnrollment").checked && studentsNumber >= 5)
+  const oneMonthAhead = new Date();
+  oneMonthAhead.setMonth(oneMonthAhead.getMonth() + 1);
+
+  if (new Date(course.start_dates[0]) > oneMonthAhead) {
+    totalCost *= 0.9;
+    discountMessage.innerHTML += "10% Early Registration Discount applied.<br>";
+  }
+
+  if (studentsNumber >= 5) {
     totalCost *= 0.85;
+    discountMessage.innerHTML += "15% Group Enrollment Discount applied.<br>";
+  }
 
-  if (document.getElementById("intensiveCourse").checked) totalCost *= 1.2;
+  if (course.week_length > 20) {
+    totalCost *= 1.2;
+    discountMessage.innerHTML += "20% Intensive Course Fee added.<br>";
+  }
+
   if (document.getElementById("supplementary").checked)
     totalCost += 2000 * studentsNumber;
   if (document.getElementById("personalized").checked)
@@ -171,18 +181,16 @@ function calculateTotalCost(course) {
   if (document.getElementById("assessment").checked) totalCost += 300;
   if (document.getElementById("interactive").checked) totalCost *= 1.5;
 
-  const selectedDate = new Date(document.getElementById("startDate").value);
-  const isWeekendOrHoliday = [0, 6].includes(selectedDate.getDay());
-  if (isWeekendOrHoliday) totalCost *= 1.5;
-
-  const startTime = document.getElementById("startTime").value;
-  if (startTime >= "09:00" && startTime <= "12:00") totalCost += 400;
-  if (startTime >= "18:00" && startTime <= "20:00") totalCost += 1000;
-
-  return totalCost * studentsNumber;
+  return totalCost;
 }
 
-async function createOrder(date, students, totalCost) {
+async function createOrder(
+  courseId,
+  startDate,
+  startTime,
+  students,
+  totalCost
+) {
   try {
     const checkboxes = document.querySelectorAll("input[type='checkbox']");
     const options = {};
@@ -191,27 +199,29 @@ async function createOrder(date, students, totalCost) {
       options[checkbox.id] = checkbox.checked;
     });
 
+    const requestData = {
+      course_id: courseId,
+      tutor_id: 0,
+      date_start: startDate,
+      time_start: startTime,
+      duration: parseInt(document.getElementById("courseDuration").value),
+      persons: students,
+      price: totalCost,
+      student_id: 7,
+      ...options,
+    };
+
     const response = await fetch(
       `http://cat-facts-api.std-900.ist.mospolytech.ru/api/orders?api_key=1351c78e-5afb-4126-9d17-5925335ee1e6`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          course_id: course.id,
-          date_start: date,
-          students: students,
-          price: totalCost,
-          ...options,
-          tutor_id: 1,
-          time_start: "10:00:00",
-          student_id: 7,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }),
+        body: JSON.stringify(requestData),
       }
     );
 
     if (!response.ok) throw new Error("Failed to create order");
+
     alert("Order created successfully!");
     window.location.href = "account.html";
   } catch (error) {
@@ -264,5 +274,27 @@ function renderPagination(totalCourses) {
   });
   paginationContainer.appendChild(nextLi);
 }
+
+document.getElementById("applyForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const courseId = parseInt(
+    document.getElementById("applyCourseName").getAttribute("data-id")
+  );
+  const startDate = document.getElementById("startDate").value;
+  const startTime = document.getElementById("startTime").value;
+  const students =
+    parseInt(document.getElementById("studentsNumber").value) || 1;
+  const totalCost = parseFloat(
+    document.getElementById("totalCost").value.replace("RUB", "").trim()
+  );
+
+  if (!courseId || !startDate || !startTime || isNaN(totalCost)) {
+    alert("Please fill out all required fields.");
+    return;
+  }
+
+  createOrder(courseId, startDate, startTime, students, totalCost);
+});
 
 fetchCourses().then(renderCourses);

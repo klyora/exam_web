@@ -26,6 +26,9 @@ header {
 body {
   padding-top: 80px;
 }
+.modal-dialog.custom-width {
+  max-width: 90%;
+}
 #notifications,
 #about,
 #courses,

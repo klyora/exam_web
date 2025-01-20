@@ -120,9 +120,7 @@
               <option value="advanced">Advanced</option>
             </select>
           </div>
-          <div class="col-12">
-            <button type="submit" class="btn btn-primary">Search</button>
-          </div>
+          <div class="col-12"></div>
         </form>
         <div id="course-list" class="row mt-4">
           <!-- Динамическое обновление курсов -->
@@ -187,6 +185,14 @@
 
     <!-- Кнопка формы заказа -->
     <div class="container text-center py-5">
+      <button
+        id="tutorSearchButton"
+        class="btn btn-success"
+        data-bs-toggle="modal"
+        data-bs-target="#tutorSearchModal"
+      >
+        Tutor Search
+      </button>
       <button
         class="btn btn-success"
         data-bs-toggle="modal"
@@ -279,12 +285,7 @@
               <div class="mb-3">
                 <label class="form-label">Additional Learning Options</label>
                 <div>
-                  <input type="checkbox" id="earlyRegistration" /> Early
-                  Registration Discount<br />
-                  <input type="checkbox" id="groupEnrollment" /> Group
-                  Enrollment Discount<br />
-                  <input type="checkbox" id="intensiveCourse" /> Intensive
-                  Course<br />
+                  <p id="discountMessage" class="text-success"></p>
                   <input type="checkbox" id="supplementary" /> Supplementary
                   Materials<br />
                   <input type="checkbox" id="personalized" /> Personalized
@@ -328,6 +329,164 @@
       </div>
     </div>
 
+    <!-- Модальное окно заказа репетиора -->
+    <div
+      class="modal fade"
+      id="bookTutorModal"
+      tabindex="-1"
+      aria-labelledby="bookTutorModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="bookTutorModalLabel">Book a Tutor</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="bookForm">
+              <div class="mb-3">
+                <label for="selectedTutorName" class="form-label">Tutor</label>
+                <input
+                  type="text"
+                  id="selectedTutorName"
+                  class="form-control"
+                  readonly
+                />
+              </div>
+              <div class="mb-3">
+                <label for="startDateTutor" class="form-label"
+                  >Select Date</label
+                >
+                <select
+                  id="startDateTutor"
+                  class="form-select"
+                  required
+                ></select>
+              </div>
+              <div class="mb-3">
+                <label for="startTimeTutor" class="form-label"
+                  >Select Time</label
+                >
+                <select
+                  id="startTimeTutor"
+                  class="form-select"
+                  required
+                ></select>
+              </div>
+              <div class="mb-3">
+                <input type="checkbox" id="supplementaryTutor" /> Supplementary
+                Materials<br />
+                <input type="checkbox" id="excursionsTutor" /> Cultural
+                Excursions<br />
+                <input type="checkbox" id="assessmentTutor" /> Language
+                Assessment<br />
+                <input type="checkbox" id="interactiveTutor" /> Access to Online
+                Platform<br />
+              </div>
+              <p id="discountMessageTutor" class="text-success"></p>
+              <p id="finalPriceDisplay" class="mt-3"></p>
+              <button
+                type="submit"
+                id="submitOrderButton"
+                class="btn btn-primary"
+              >
+                Confirm Booking
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Модальное окно поиска репетитора -->
+    <div
+      class="modal fade"
+      id="tutorSearchModal"
+      tabindex="-1"
+      aria-labelledby="tutorSearchModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog custom-width">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="tutorSearchModalLabel">
+              Find a Russian Tutor
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="tutorSearchForm">
+              <div class="mb-3">
+                <label for="languageLevel" class="form-label"
+                  >Language Level</label
+                >
+                <select id="languageLevel" class="form-select">
+                  <option value="all">All</option>
+                  <option value="beginner">Beginner</option>
+                  <option value="intermediate">Intermediate</option>
+                  <option value="advanced">Advanced</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="availableDays" class="form-label"
+                  >Available Days</label
+                >
+                <select id="availableDays" class="form-select">
+                  <option value="all">All</option>
+                  <option value="Monday">Monday</option>
+                  <option value="Tuesday">Tuesday</option>
+                  <option value="Wednesday">Wednesday</option>
+                  <option value="Thursday">Thursday</option>
+                  <option value="Friday">Friday</option>
+                  <option value="Saturday">Saturday</option>
+                  <option value="Sunday">Sunday</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="timeStart" class="form-label"
+                  >Preferred Start Time</label
+                >
+                <input type="time" id="timeStart" class="form-control" />
+              </div>
+              <div class="mb-3">
+                <label for="timeEnd" class="form-label"
+                  >Preferred End Time</label
+                >
+                <input type="time" id="timeEnd" class="form-control" />
+              </div>
+            </form>
+            <div class="mt-4">
+              <h5>Search Results</h5>
+              <table id="tutorResultsTable" class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Language Level</th>
+                    <th>Languages Spoken</th>
+                    <th>Experience (years)</th>
+                    <th>Hourly Rate (rubles)</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Футер -->
     <footer class="bg-dark text-white py-3">
       <div class="container d-flex justify-content-between">
@@ -341,8 +500,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="scripts/script.js"></script>
-    <script src="scripts/apply.js"></script>
     <script src="scripts/tutors.js"></script>
     <script src="scripts/courses.js"></script>
+    <script src="scripts/tutorSearch.js"></script>
   </body>
 </html>

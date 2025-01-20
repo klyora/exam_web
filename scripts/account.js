@@ -160,12 +160,6 @@ document.addEventListener("DOMContentLoaded", () => {
           order.duration || 0
         } weeks`;
 
-        document.getElementById("earlyRegistration").checked =
-          order.earlyRegistration || false;
-        document.getElementById("groupEnrollment").checked =
-          order.groupEnrollment || false;
-        document.getElementById("intensiveCourse").checked =
-          order.intensiveCourse || false;
         document.getElementById("supplementary").checked =
           order.supplementary || false;
         document.getElementById("personalized").checked =
@@ -203,12 +197,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.getElementById("studentsNumber").value
               ),
               duration: parseInt(order.duration),
-              earlyRegistration:
-                document.getElementById("earlyRegistration").checked,
-              groupEnrollment:
-                document.getElementById("groupEnrollment").checked,
-              intensiveCourse:
-                document.getElementById("intensiveCourse").checked,
               supplementary: document.getElementById("supplementary").checked,
               personalized: document.getElementById("personalized").checked,
               excursions: document.getElementById("excursions").checked,
@@ -269,13 +257,23 @@ document.addEventListener("DOMContentLoaded", () => {
       course.total_length *
       course.week_length *
       isWeekendOrHoliday;
-    if (document.getElementById("earlyRegistration").checked) totalCost *= 0.9;
-    if (
-      document.getElementById("groupEnrollment").checked &&
-      studentsNumber >= 5
-    )
+    const discountMessage = document.getElementById("discountMessage");
+    discountMessage.innerHTML = "";
+    if (new Date() < new Date(course.start_dates[0])) {
+      totalCost *= 0.9;
+      discountMessage.innerHTML +=
+        "10% Early Registration Discount applied.<br>";
+    }
+
+    if (studentsNumber >= 5) {
       totalCost *= 0.85;
-    if (document.getElementById("intensiveCourse").checked) totalCost *= 1.2;
+      discountMessage.innerHTML += "15% Group Enrollment Discount applied.<br>";
+    }
+
+    if (course.week_length > 20) {
+      totalCost *= 1.2;
+      discountMessage.innerHTML += "20% Intensive Course Fee added.<br>";
+    }
     if (document.getElementById("supplementary").checked)
       totalCost += 2000 * studentsNumber;
     if (document.getElementById("personalized").checked)
