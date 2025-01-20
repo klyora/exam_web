@@ -1,7 +1,7 @@
 async function fetchTutors() {
   try {
     const response = await fetch(
-      `http://cat-facts-api.std-900.ist.mospolytech.ru/api/tutors?api_key=${API_KEY}`
+      `http://cat-facts-api.std-900.ist.mospolytech.ru/api/tutors?api_key=1351c78e-5afb-4126-9d17-5925335ee1e6`
     );
     if (!response.ok) {
       throw new Error("Failed to fetch tutors");
@@ -28,23 +28,20 @@ function renderTutors(tutors) {
   }
 
   tutors.forEach((tutor) => {
+    const languages = Array.isArray(tutor.languages_offered)
+      ? tutor.languages_offered.join(", ")
+      : "No languages specified";
     const card = `
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">${tutor.name}</h5>
-                        <p class="card-text">Experience: ${
-                          tutor.work_experience
-                        } years</p>
-                        <p class="card-text">Languages: ${tutor.languages_offered.join(
-                          ", "
-                        )}</p>
-                        <p class="card-text">Price per hour: ${
-                          tutor.price_per_hour
-                        } RUB</p>
-                    </div>
-                </div>
-            </div>`;
+      <div class="col-md-4">
+          <div class="card">
+              <div class="card-body">
+                  <h5 class="card-title">${tutor.name}</h5>
+                  <p class="card-text">Experience: ${tutor.work_experience} years</p>
+                  <p class="card-text">Languages: ${languages}</p>
+                  <p class="card-text">Price per hour: ${tutor.price_per_hour} RUB</p>
+              </div>
+          </div>
+      </div>`;
     tutorList.innerHTML += card;
   });
 }

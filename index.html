@@ -199,15 +199,15 @@
     <!-- Модальное окно заказа курсов -->
     <div
       class="modal fade"
-      id="orderForm"
+      id="applyModal"
       tabindex="-1"
-      aria-labelledby="orderFormLabel"
+      aria-labelledby="applyModalLabel"
       aria-hidden="true"
     >
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="orderFormLabel">Request a Session</h5>
+            <h5 class="modal-title" id="applyModalLabel">Application Form</h5>
             <button
               type="button"
               class="btn-close"
@@ -216,44 +216,112 @@
             ></button>
           </div>
           <div class="modal-body">
-            <form id="order-request-form">
+            <form id="applyForm">
               <div class="mb-3">
-                <label for="userName" class="form-label">Your Name</label>
+                <label for="applyCourseName" class="form-label"
+                  >Course Name</label
+                >
                 <input
                   type="text"
                   class="form-control"
-                  id="userName"
-                  placeholder="Enter your name"
-                  required
+                  id="applyCourseName"
+                  readonly
                 />
               </div>
               <div class="mb-3">
-                <label for="userEmail" class="form-label">Email</label>
+                <label for="instructorName" class="form-label"
+                  >Instructor Name</label
+                >
                 <input
-                  type="email"
+                  type="text"
                   class="form-control"
-                  id="userEmail"
-                  placeholder="Enter your email"
+                  id="instructorName"
+                  readonly
+                />
+              </div>
+              <div class="mb-3">
+                <label for="startDate" class="form-label">Start Date</label>
+                <select class="form-select" id="startDate" required></select>
+              </div>
+              <div class="mb-3">
+                <label for="startTime" class="form-label">Start Time</label>
+                <select class="form-select" id="startTime" required></select>
+              </div>
+              <div class="mb-3">
+                <label for="studentsNumber" class="form-label"
+                  >Number of Students</label
+                >
+                <input
+                  type="number"
+                  class="form-control"
+                  id="studentsNumber"
+                  min="1"
+                  max="20"
+                  value="1"
                   required
                 />
               </div>
               <div class="mb-3">
-                <label for="userMessage" class="form-label">Message</label>
-                <textarea
+                <label for="courseDuration" class="form-label"
+                  >Course Duration</label
+                >
+                <input
+                  type="text"
                   class="form-control"
-                  id="userMessage"
-                  rows="3"
-                  placeholder="Your message"
-                ></textarea>
+                  id="courseDuration"
+                  readonly
+                />
               </div>
-              <button type="submit" class="btn btn-primary">Submit</button>
-              <button
-                type="button"
-                class="btn btn-secondary"
-                data-bs-dismiss="modal"
-              >
-                Close
-              </button>
+              <div class="mb-3">
+                <label for="endDate" class="form-label">End Date</label>
+                <input type="text" class="form-control" id="endDate" readonly />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Additional Learning Options</label>
+                <div>
+                  <input type="checkbox" id="earlyRegistration" /> Early
+                  Registration Discount<br />
+                  <input type="checkbox" id="groupEnrollment" /> Group
+                  Enrollment Discount<br />
+                  <input type="checkbox" id="intensiveCourse" /> Intensive
+                  Course<br />
+                  <input type="checkbox" id="supplementary" /> Supplementary
+                  Materials<br />
+                  <input type="checkbox" id="personalized" /> Personalized
+                  Sessions<br />
+                  <input type="checkbox" id="excursions" /> Cultural
+                  Excursions<br />
+                  <input type="checkbox" id="assessment" /> Language
+                  Assessment<br />
+                  <input type="checkbox" id="interactive" /> Access to Online
+                  Platform<br />
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="totalCost" class="form-label">Total Cost</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="totalCost"
+                  readonly
+                />
+              </div>
+              <div class="modal-footer">
+                <button
+                  id="submitApplication"
+                  type="submit"
+                  class="btn btn-primary"
+                >
+                  Submit
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  Cancel
+                </button>
+              </div>
             </form>
           </div>
         </div>
@@ -273,6 +341,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="scripts/script.js"></script>
+    <script src="scripts/apply.js"></script>
     <script src="scripts/tutors.js"></script>
     <script src="scripts/courses.js"></script>
   </body>
