@@ -29,6 +29,20 @@ body {
 .modal-dialog.custom-width {
   max-width: 90%;
 }
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex-grow: 1;
+}
 #notifications,
 #about,
 #courses,
