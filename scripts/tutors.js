@@ -99,7 +99,7 @@ function setupBookingForm(tutor) {
     );
     document.getElementById(
       "finalPriceDisplay"
-    ).innerHTML = `Final Price: ${finalPrice.toFixed(2)} RUB`;
+    ).textContent = `Final Price: ${finalPrice.toFixed(2)} RUB`;
   };
 
   startDateSelect.addEventListener("change", updatePrice);
@@ -124,11 +124,17 @@ function setupBookingForm(tutor) {
 
     const orderData = {
       tutor_id: tutor.id,
-      course_id: 0,
+      course_id: 0, 
       date_start: document.getElementById("startDateTutor").value,
       time_start: document.getElementById("startTimeTutor").value,
       persons: 1,
-      price: parseFloat(document.getElementById("finalPriceDisplay").value),
+      personalized: true,
+      duration: 1,
+      price: parseFloat(
+        document
+          .getElementById("finalPriceDisplay")
+          .textContent.replace(/[^0-9.]/g, "")
+      ),
       early_registration:
         new Date() < new Date(document.getElementById("startDateTutor").value),
       supplementary: document.getElementById("supplementaryTutor").checked,
@@ -163,6 +169,10 @@ function calculateTutorPrice(basePrice, options, selectedDate) {
 
 async function submitTutorOrder(orderData) {
   try {
+    if (!orderData.tutor_id || !orderData.date_start || !orderData.time_start) {
+      throw new Error("Missing required fields: tutor_id, date_start, or time_start");
+    }
+
     const response = await fetch(
       `http://cat-facts-api.std-900.ist.mospolytech.ru/api/orders?api_key=1351c78e-5afb-4126-9d17-5925335ee1e6`,
       {
@@ -173,16 +183,19 @@ async function submitTutorOrder(orderData) {
     );
 
     if (!response.ok) {
-      throw new Error("Failed to submit order");
+      const errorDetails = await response.text();
+      console.error("Error Details:", errorDetails);
+      throw new Error(`Failed to submit order: ${errorDetails}`);
     }
 
-    alert("Order submitted successfully!");
     const result = await response.json();
-    console.log(result);
+
+    alert("Order submitted successfully!");
   } catch (error) {
     console.error("Error submitting order:", error);
-    alert("Failed to submit order. Please try again.");
+    alert("Failed to submit order. Please check your input and try again.");
   }
 }
+
 
 fetchTutors().then(renderTutors);

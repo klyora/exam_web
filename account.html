@@ -17,9 +17,9 @@
       <div class="container d-flex justify-content-between align-items-center">
         <h1 class="h3">Lingua - Account</h1>
         <nav>
-          <ul class="nav">
+          <ul class="nav-account">
             <li class="nav-item">
-              <a href="index.html" class="nav-link text-white">Home</a>
+              <a href="./index.html" class="nav-link text-white">Home</a>
             </li>
           </ul>
         </nav>
@@ -45,6 +45,10 @@
           </thead>
           <tbody></tbody>
         </table>
+        <nav aria-label="Page navigation">
+          <ul id="pagination-controls" class="pagination justify-content-center mt-4">
+          </ul>
+        </nav>
       </div>
     </section>
 
@@ -70,6 +74,7 @@
             <p>
               <strong>Course Name:</strong> <span id="detailsCourseName"></span>
             </p>
+            <p><strong>Tutor:</strong> <span id="detailsTeacher">N/A</span></p>
             <p>
               <strong>Description:</strong>
               <span id="detailsDescription"></span>
@@ -152,7 +157,7 @@
           </div>
           <div class="modal-body">
             <form id="applyForm">
-              <div class="mb-3">
+              <div class="mb-3 additional-field">
                 <label for="applyCourseName" class="form-label"
                   >Course Name</label
                 >
@@ -184,7 +189,7 @@
                   required
                 ></select>
               </div>
-              <div class="mb-3">
+              <div class="mb-3 additional-field">
                 <label for="studentsNumber" class="form-label"
                   >Number of Students</label
                 >
@@ -198,7 +203,7 @@
                   required
                 />
               </div>
-              <div class="mb-3">
+              <div class="mb-3 additional-field">
                 <label for="courseDuration" class="form-label"
                   >Course Duration</label
                 >
@@ -209,7 +214,7 @@
                   readonly
                 />
               </div>
-              <div class="mb-3">
+              <div class="mb-3 additional-field">
                 <label for="endDate" class="form-label">End Date</label>
                 <input type="text" class="form-control" id="endDate" readonly />
               </div>

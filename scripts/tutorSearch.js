@@ -10,9 +10,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const response = await fetch(
         `http://cat-facts-api.std-900.ist.mospolytech.ru/api/tutors?api_key=1351c78e-5afb-4126-9d17-5925335ee1e6`
       );
-      if (!response.ok) {
-        throw new Error("Failed to fetch tutors");
-      }
+      if (!response.ok) throw new Error("Failed to fetch tutors");
       return await response.json();
     } catch (error) {
       console.error("Error fetching tutors:", error);
@@ -21,10 +19,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   const filterTutors = (tutors) => {
-    const level = languageLevelInput.value.toLowerCase();
-    const day = availableDaysInput.value;
-    const timeStart = timeStartInput.value;
-    const timeEnd = timeEndInput.value;
+    const level = languageLevelInput?.value?.toLowerCase() || "all";
+    const day = availableDaysInput?.value || "all";
+    const timeStart = timeStartInput?.value || "";
+    const timeEnd = timeEndInput?.value || "";
 
     return tutors.filter((tutor) => {
       const matchesLevel =
@@ -83,16 +81,22 @@ document.addEventListener("DOMContentLoaded", async () => {
         const searchModal = bootstrap.Modal.getInstance(
           document.getElementById("tutorSearchModal")
         );
-        searchModal.hide();
+        if (searchModal) searchModal.hide();
       });
     });
   };
 
   const openBookingModal = (tutorName, tutorPrice, tutorId) => {
-    document.getElementById("selectedTutorName").value = tutorName;
-
+    const tutorNameInput = document.getElementById("selectedTutorName");
     const startDateSelect = document.getElementById("startDateTutor");
     const startTimeSelect = document.getElementById("startTimeTutor");
+
+    if (!tutorNameInput || !startDateSelect || !startTimeSelect) {
+      console.error("Required elements not found in the DOM.");
+      return;
+    }
+
+    tutorNameInput.value = tutorName;
 
     startDateSelect.innerHTML = "";
     startTimeSelect.innerHTML = "";
@@ -111,6 +115,25 @@ document.addEventListener("DOMContentLoaded", async () => {
       startTimeSelect.appendChild(option);
     });
 
+    const calculatePrice = (basePrice, options, selectedDate) => {
+      let price = basePrice;
+
+      if (new Date(selectedDate) - new Date() > 30 * 24 * 60 * 60 * 1000) {
+        price *= 0.9;
+        document.getElementById("discountMessageTutor").innerHTML =
+          "10% Early Registration Discount applied.<br>";
+      } else {
+        document.getElementById("discountMessageTutor").innerHTML = "";
+      }
+
+      if (options.supplementary) price += 2000; 
+      if (options.excursions) price *= 1.25;
+      if (options.assessment) price += 300; 
+      if (options.interactive) price *= 1.5;
+
+      return price;
+    };
+
     const updatePrice = () => {
       const options = {
         supplementary: document.getElementById("supplementaryTutor").checked,
@@ -119,7 +142,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         interactive: document.getElementById("interactiveTutor").checked,
       };
 
-      const selectedDate = document.getElementById("startDateTutor").value;
+      const selectedDate = startDateSelect.value;
       const basePrice = parseFloat(tutorPrice);
       const finalPrice = calculatePrice(basePrice, options, selectedDate);
       document.getElementById(
@@ -127,21 +150,35 @@ document.addEventListener("DOMContentLoaded", async () => {
       ).innerHTML = `Final Price: ${finalPrice.toFixed(2)} RUB`;
     };
 
-    document
-      .getElementById("supplementaryTutor")
-      .addEventListener("change", updatePrice);
-    document
-      .getElementById("excursionsTutor")
-      .addEventListener("change", updatePrice);
-    document
-      .getElementById("assessmentTutor")
-      .addEventListener("change", updatePrice);
-    document
-      .getElementById("interactiveTutor")
-      .addEventListener("change", updatePrice);
+    ["supplementaryTutor", "excursionsTutor", "assessmentTutor", "interactiveTutor"].forEach((id) =>
+      document.getElementById(id)?.addEventListener("change", updatePrice)
+    );
+
     startDateSelect.addEventListener("change", updatePrice);
 
     updatePrice();
+
+    const submitOrder = async (orderData) => {
+      try {
+        const response = await fetch(
+          `http://cat-facts-api.std-900.ist.mospolytech.ru/api/orders?api_key=1351c78e-5afb-4126-9d17-5925335ee1e6`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(orderData),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to submit order");
+        }
+
+        alert("Order submitted successfully!");
+      } catch (error) {
+        console.error("Error submitting order:", error);
+        alert("Failed to submit order. Please try again.");
+      }
+    };
 
     const bookingModal = new bootstrap.Modal(
       document.getElementById("bookTutorModal")
@@ -156,6 +193,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         tutor_id: tutorId,
         date_start: startDateSelect.value,
         time_start: startTimeSelect.value,
+        duration: 1,
         supplementary: document.getElementById("supplementaryTutor").checked,
         excursions: document.getElementById("excursionsTutor").checked,
         assessment: document.getElementById("assessmentTutor").checked,
@@ -173,10 +211,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateResultsTable(filteredTutors);
   };
 
-  languageLevelInput.addEventListener("change", applyFilters);
-  availableDaysInput.addEventListener("change", applyFilters);
-  timeStartInput.addEventListener("input", applyFilters);
-  timeEndInput.addEventListener("input", applyFilters);
+  ["change", "input"].forEach((event) => {
+    languageLevelInput.addEventListener(event, applyFilters);
+    availableDaysInput.addEventListener(event, applyFilters);
+    timeStartInput.addEventListener(event, applyFilters);
+    timeEndInput.addEventListener(event, applyFilters);
+  });
 
   applyFilters();
 });
