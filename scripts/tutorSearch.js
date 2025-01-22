@@ -70,138 +70,45 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     const selectButtons = resultsTableBody.querySelectorAll(".select-tutor");
-    selectButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        const tutorName = button.getAttribute("data-name");
-        const tutorPrice = button.getAttribute("data-price");
-        const tutorId = button.getAttribute("data-id");
-
-        openBookingModal(tutorName, tutorPrice, tutorId);
+    selectButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const tutorId = btn.getAttribute("data-id");
+        const tutorName = btn.getAttribute("data-name");
+        const tutorPrice = btn.getAttribute("data-price");
 
         const searchModal = bootstrap.Modal.getInstance(
           document.getElementById("tutorSearchModal")
         );
-        if (searchModal) searchModal.hide();
+        if (searchModal) {
+          searchModal.hide();
+        }
+
+        openBookTutorModal(tutorId, tutorName, tutorPrice);
       });
     });
   };
 
-  const openBookingModal = (tutorName, tutorPrice, tutorId) => {
-    const tutorNameInput = document.getElementById("selectedTutorName");
-    const startDateSelect = document.getElementById("startDateTutor");
-    const startTimeSelect = document.getElementById("startTimeTutor");
+  const openBookTutorModal = (tutorId, tutorName, tutorPrice) => {
+    const tutor = {
+      id: tutorId,
+      name: tutorName,
+      price_per_hour: Number(tutorPrice),
+    };
 
-    if (!tutorNameInput || !startDateSelect || !startTimeSelect) {
-      console.error("Required elements not found in the DOM.");
+    if (typeof setupBookingForm === "function") {
+      setupBookingForm(tutor);
+    } else {
+      console.error("Function setupBookingForm not defined!");
       return;
     }
 
-    tutorNameInput.value = tutorName;
-
-    startDateSelect.innerHTML = "";
-    startTimeSelect.innerHTML = "";
-
-    ["2025-02-15", "2025-02-20", "2025-02-25"].forEach((date) => {
-      const option = document.createElement("option");
-      option.value = date;
-      option.textContent = new Date(date).toLocaleDateString();
-      startDateSelect.appendChild(option);
-    });
-
-    ["09:00", "10:00", "11:00"].forEach((time) => {
-      const option = document.createElement("option");
-      option.value = time;
-      option.textContent = time;
-      startTimeSelect.appendChild(option);
-    });
-
-    const calculatePrice = (basePrice, options, selectedDate) => {
-      let price = basePrice;
-
-      if (new Date(selectedDate) - new Date() > 30 * 24 * 60 * 60 * 1000) {
-        price *= 0.9;
-        document.getElementById("discountMessageTutor").innerHTML =
-          "10% Early Registration Discount applied.<br>";
-      } else {
-        document.getElementById("discountMessageTutor").innerHTML = "";
-      }
-
-      if (options.supplementary) price += 2000; 
-      if (options.excursions) price *= 1.25;
-      if (options.assessment) price += 300; 
-      if (options.interactive) price *= 1.5;
-
-      return price;
-    };
-
-    const updatePrice = () => {
-      const options = {
-        supplementary: document.getElementById("supplementaryTutor").checked,
-        excursions: document.getElementById("excursionsTutor").checked,
-        assessment: document.getElementById("assessmentTutor").checked,
-        interactive: document.getElementById("interactiveTutor").checked,
-      };
-
-      const selectedDate = startDateSelect.value;
-      const basePrice = parseFloat(tutorPrice);
-      const finalPrice = calculatePrice(basePrice, options, selectedDate);
-      document.getElementById(
-        "finalPriceDisplay"
-      ).innerHTML = `Final Price: ${finalPrice.toFixed(2)} RUB`;
-    };
-
-    ["supplementaryTutor", "excursionsTutor", "assessmentTutor", "interactiveTutor"].forEach((id) =>
-      document.getElementById(id)?.addEventListener("change", updatePrice)
-    );
-
-    startDateSelect.addEventListener("change", updatePrice);
-
-    updatePrice();
-
-    const submitOrder = async (orderData) => {
-      try {
-        const response = await fetch(
-          `http://cat-facts-api.std-900.ist.mospolytech.ru/api/orders?api_key=1351c78e-5afb-4126-9d17-5925335ee1e6`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(orderData),
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to submit order");
-        }
-
-        alert("Order submitted successfully!");
-      } catch (error) {
-        console.error("Error submitting order:", error);
-        alert("Failed to submit order. Please try again.");
-      }
-    };
-
-    const bookingModal = new bootstrap.Modal(
-      document.getElementById("bookTutorModal")
-    );
-    bookingModal.show();
-
-    const submitButton = document.getElementById("submitOrderButton");
-    submitButton.onclick = async (e) => {
-      e.preventDefault();
-
-      const orderData = {
-        tutor_id: tutorId,
-        date_start: startDateSelect.value,
-        time_start: startTimeSelect.value,
-        duration: 1,
-        supplementary: document.getElementById("supplementaryTutor").checked,
-        excursions: document.getElementById("excursionsTutor").checked,
-        assessment: document.getElementById("assessmentTutor").checked,
-        interactive: document.getElementById("interactiveTutor").checked,
-      };
-
-      await submitOrder(orderData);
-    };
+    const bookTutorModalElem = document.getElementById("bookTutorModal");
+    if (bookTutorModalElem) {
+      const bookingModal = new bootstrap.Modal(bookTutorModalElem);
+      bookingModal.show();
+    } else {
+      console.error("Элемент bookTutorModal не найден в DOM");
+    }
   };
 
   const tutors = await fetchTutors();
