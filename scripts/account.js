@@ -1,49 +1,31 @@
 document.addEventListener("DOMContentLoaded", () => {
   const ordersPerPage = 5;
   let currentPage = 1;
-  let orders = [];
-  let courseMap = {};
-  let tutorMap = {};
+  let globalOrders = [];
+  let globalCourseMap = {};
+  let globalTutorMap = {};
 
   async function fetchOrders() {
     try {
       const response = await fetch(
-        `http://cat-facts-api.std-900.ist.mospolytech.ru/api/orders?api_key=1351c78e-5afb-4126-9d17-5925335ee1e6`
+        "http://cat-facts-api.std-900.ist.mospolytech.ru/api/orders?api_key=1351c78e-5afb-4126-9d17-5925335ee1e6"
       );
       if (!response.ok) throw new Error("Failed to fetch orders");
-      const orders = await response.json();
+
+      globalOrders = await response.json();
+
       const tutors = await fetchTutors();
-      await fetchCoursesAndRenderOrders(orders, tutors);
+
+      await fetchCoursesAndRenderOrders(globalOrders, tutors);
     } catch (error) {
       console.error("Error fetching orders:", error);
-    }
-  }
-
-  async function fetchCoursesAndRenderOrders(orders, tutors) {
-    try {
-      const response = await fetch(
-        `http://cat-facts-api.std-900.ist.mospolytech.ru/api/courses?api_key=1351c78e-5afb-4126-9d17-5925335ee1e6`
-      );
-      if (!response.ok) throw new Error("Failed to fetch courses");
-      const courses = await response.json();
-      const courseMap = courses.reduce((map, course) => {
-        map[course.id] = course;
-        return map;
-      }, {});
-      const tutorMap = tutors.reduce((map, tutor) => {
-        map[tutor.id] = tutor.name;
-        return map;
-      }, {});
-      renderOrders(orders, courseMap, tutorMap);
-    } catch (error) {
-      console.error("Error fetching courses:", error);
     }
   }
 
   async function fetchTutors() {
     try {
       const response = await fetch(
-        `http://cat-facts-api.std-900.ist.mospolytech.ru/api/tutors?api_key=1351c78e-5afb-4126-9d17-5925335ee1e6`
+        "http://cat-facts-api.std-900.ist.mospolytech.ru/api/tutors?api_key=1351c78e-5afb-4126-9d17-5925335ee1e6"
       );
       if (!response.ok) throw new Error("Failed to fetch tutors");
       return await response.json();
@@ -53,17 +35,42 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  async function fetchCoursesAndRenderOrders(orders, tutors) {
+    try {
+      const response = await fetch(
+        "http://cat-facts-api.std-900.ist.mospolytech.ru/api/courses?api_key=1351c78e-5afb-4126-9d17-5925335ee1e6"
+      );
+      if (!response.ok) throw new Error("Failed to fetch courses");
+      const courses = await response.json();
+
+      globalCourseMap = courses.reduce((map, course) => {
+        map[course.id] = course;
+        return map;
+      }, {});
+      globalTutorMap = tutors.reduce((map, tutor) => {
+        map[tutor.id] = tutor.name;
+        return map;
+      }, {});
+
+      renderOrders(globalOrders, globalCourseMap, globalTutorMap);
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+    }
+  }
+
   function renderOrders(orders, courseMap, tutorMap) {
     const ordersTable = document.getElementById("orders-table");
     if (!ordersTable) return;
-    ordersTable.querySelector("tbody").innerHTML = "";
+
+    const tbody = ordersTable.querySelector("tbody");
+    tbody.innerHTML = "";
 
     const startIndex = (currentPage - 1) * ordersPerPage;
     const endIndex = Math.min(startIndex + ordersPerPage, orders.length);
     const currentOrders = orders.slice(startIndex, endIndex);
 
     if (currentOrders.length === 0) {
-      ordersTable.querySelector("tbody").innerHTML = `
+      tbody.innerHTML = `
         <tr>
           <td colspan="5" class="text-center">No orders yet.</td>
         </tr>`;
@@ -71,11 +78,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     currentOrders.forEach((order, index) => {
-      const course = courseMap[order.course_id] || {};
       const courseName =
         order.course_id === 0
           ? "Tutor"
           : courseMap[order.course_id]?.name || "Unknown Course";
+
       const row = `
         <tr>
           <td>${startIndex + index + 1}</td>
@@ -83,18 +90,21 @@ document.addEventListener("DOMContentLoaded", () => {
           <td>${order.date_start}</td>
           <td>${order.price} RUB</td>
           <td>
-            <button class="btn btn-info btn-sm details-btn" data-bs-toggle="modal" data-bs-target="#detailsModal" data-order-id="${
-              order.id
-            }">Details</button>
-            <button class="btn btn-warning btn-sm edit-btn" data-bs-toggle="modal" data-bs-target="#editModal" data-order-id="${
-              order.id
-            }">Edit</button>
-            <button class="btn btn-danger btn-sm delete-btn" data-bs-toggle="modal" data-bs-target="#deleteModal" data-order-id="${
-              order.id
-            }">Delete</button>
+            <button class="btn btn-info btn-sm details-btn"
+              data-bs-toggle="modal"
+              data-bs-target="#detailsModal"
+              data-order-id="${order.id}">Details</button>
+            <button class="btn btn-warning btn-sm edit-btn"
+              data-bs-toggle="modal"
+              data-bs-target="#editModal"
+              data-order-id="${order.id}">Edit</button>
+            <button class="btn btn-danger btn-sm delete-btn"
+              data-bs-toggle="modal"
+              data-bs-target="#deleteModal"
+              data-order-id="${order.id}">Delete</button>
           </td>
         </tr>`;
-      ordersTable.querySelector("tbody").innerHTML += row;
+      tbody.innerHTML += row;
     });
 
     attachModalEventListeners(currentOrders, courseMap, tutorMap);
@@ -109,13 +119,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     for (let i = 1; i <= totalPages; i++) {
       const pageButton = document.createElement("li");
-    pageButton.className = `page-item ${i === currentPage ? "active" : ""}`;
-    pageButton.innerHTML = `<button class="page-link">${i}</button>`;
+      pageButton.className = `page-item ${i === currentPage ? "active" : ""}`;
+      pageButton.innerHTML = `<button class="page-link">${i}</button>`;
+
       pageButton.addEventListener("click", () => {
         currentPage = i;
-        renderOrders(orders, courseMap, tutorMap);
-        renderPaginationControls(totalOrders);
+        renderOrders(globalOrders, globalCourseMap, globalTutorMap);
       });
+
       paginationContainer.appendChild(pageButton);
     }
   }
@@ -410,10 +421,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (document.getElementById("supplementary").checked)
-      totalCost += 2000 * studentsNumber; 
-    if (document.getElementById("excursions").checked) totalCost *= 1.25; // Экскурсии
-    if (document.getElementById("assessment").checked) totalCost += 300; // Оценка
-    if (document.getElementById("interactive").checked) totalCost *= 1.5; // Интерактив
+      totalCost += 2000 * studentsNumber;
+    if (document.getElementById("excursions").checked) totalCost *= 1.25;
+    if (document.getElementById("assessment").checked) totalCost += 300;
+    if (document.getElementById("interactive").checked) totalCost *= 1.5;
 
     totalCost += morningSurcharge + eveningSurcharge;
 
